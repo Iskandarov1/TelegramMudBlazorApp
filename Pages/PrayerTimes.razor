@@ -1,0 +1,220 @@
+@page "/"
+@page "/prayertimes"
+@using System.Text.Json
+@using MudBlazor
+@using Microsoft.AspNetCore.WebUtilities
+@inject IJSRuntime JSRuntime
+@inject NavigationManager Nav
+
+<MudContainer>
+    @if (isLoading)
+    {
+        <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+    }
+    else
+    {
+        <MudText Typo="Typo.h4">Prayer Times for @City</MudText>
+
+        <div class="ma-4">
+            <MudCard>
+                <MudCardContent>
+                    <MudText Typo="Typo.h5">Current Time: @DateTime.Now.ToString("hh:mm:ss tt")</MudText>
+                </MudCardContent>
+            </MudCard>
+        </div>
+        
+        <!-- Prayer Times Timeline -->
+        <MudTimeline>
+            <!-- EARLY MORNING (FAJR) -->
+            <MudTimelineItem Color="@GetTimelineItemColor(FajrTime)" Elevation="25">
+                <ItemOpposite>
+                <MudText Typo="Typo.h5">Fajr</MudText>
+                </ItemOpposite>
+                <ItemContent>
+
+                <MudText Typo="Typo.body2" Class="mud-text-secondary">
+                    When: @(FajrTime is null 
+                        ? "--" 
+                        : (DateTime.Today + FajrTime.Value).ToString("hh:mm tt"))
+                </MudText>
+                <MudText Typo="Typo.body2" Class="mud-text-secondary">
+                    Time Left: @TimeUntil(FajrTime)
+                </MudText>
+                </ItemContent>
+            </MudTimelineItem>
+
+            <!-- MIDDAY (DHUHR) -->
+            <MudTimelineItem Color="@GetTimelineItemColor(DhuhrTime)" Elevation="25" TimelineAlign="TimelineAlign.End">
+               <ItemOpposite>
+                <MudText Typo="Typo.h5">Dhuhr</MudText>
+                </ItemOpposite>
+                <ItemContent>
+                <MudText Typo="Typo.body2" Class="mud-text-secondary">
+                    When: @(DhuhrTime is null 
+                        ? "--" 
+                        : (DateTime.Today + DhuhrTime.Value).ToString("hh:mm tt"))
+                </MudText>
+                <MudText Typo="Typo.body2" Class="mud-text-secondary">
+                    Time Left: @TimeUntil(DhuhrTime)
+                </MudText>
+                </ItemContent>
+            </MudTimelineItem>
+
+            <!-- AFTERNOON (ASR) -->
+            <MudTimelineItem Color="@GetTimelineItemColor(AsrTime)" Elevation="25">
+                <ItemOpposite>
+                <MudText Typo="Typo.h5">Asr</MudText>
+                </ItemOpposite>
+                <ItemContent>
+                <MudText Typo="Typo.body2" Class="mud-text-secondary">
+                    When: @(AsrTime is null 
+                        ? "--" 
+                        : (DateTime.Today + AsrTime.Value).ToString("hh:mm tt"))
+                </MudText>
+                <MudText Typo="Typo.body2">
+                            Time Left: @TimeUntil(IshaTime)
+                        </MudText>
+                </ItemContent>
+                </MudTimelineItem>
+
+            <!-- SUNSET (MAGHRIB) -->
+            <MudTimelineItem Color="@GetTimelineItemColor(MaghribTime)" Elevation="25" TimelineAlign="TimelineAlign.End">
+                <ItemOpposite>
+                <MudText Typo="Typo.h5">Maghrib</MudText>
+                </ItemOpposite>
+                <ItemContent>
+                <MudText Typo="Typo.body2" Class="mud-text-secondary">
+                    When: @(MaghribTime is null 
+                        ? "--" 
+                        : (DateTime.Today + MaghribTime.Value).ToString("hh:mm tt"))
+                </MudText>
+                <MudText Typo="Typo.body2" Class="mud-text-secondary">
+                    Time Left: @TimeUntil(MaghribTime)
+                </MudText>
+                </ItemContent>
+            </MudTimelineItem>
+
+            <!-- NIGHT (ISHA) -->
+            <MudTimelineItem Color="@GetTimelineItemColor(IshaTime)" Elevation="25">
+                <ItemOpposite>
+                <MudText Typo="Typo.h5">Isha</MudText>
+                </ItemOpposite>
+                <ItemContent>
+                <MudText Typo="Typo.body2" Class="mud-text-secondary">
+                    When: @(IshaTime is null 
+                        ? "--" 
+                        : (DateTime.Today + IshaTime.Value).ToString("hh:mm tt"))
+                </MudText>
+                <MudText Typo="Typo.body2" Class="mud-text-secondary">
+                    Time Left: @TimeUntil(IshaTime)
+                </MudText>
+                </ItemContent>
+            </MudTimelineItem>
+        </MudTimeline>
+    }
+</MudContainer>
+
+@code {
+    private bool isLoading = true;
+    private double? latitude;
+    private double? longitude;
+    private string City { get; set; } = "DefaultCity";
+    private TimeSpan? FajrTime    { get; set; }
+    private TimeSpan? DhuhrTime   { get; set; }
+    private TimeSpan? AsrTime     { get; set; }
+    private TimeSpan? MaghribTime { get; set; }
+    private TimeSpan? IshaTime    { get; set; }
+
+    private readonly Color _passedColor = Color.Dark;
+    private readonly Color _upcomingColor = Color.Info;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var location = await JSRuntime.InvokeAsync<LocationResult>("getLocation");
+            latitude = location.Latitude;
+            longitude = location.Longitude;
+            await FetchPrayerTimes();
+        }
+        catch (Exception ex)
+        {
+            // Fallback to default city if location access fails
+            await FetchPrayerTimes("DefaultCity");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task FetchPrayerTimes(string city = null)
+    {
+        if (string.IsNullOrWhiteSpace(city) && (!latitude.HasValue || !longitude.HasValue))
+            return;
+
+        try
+        {
+            string url;
+            if (!string.IsNullOrWhiteSpace(city))
+            {
+                url = $"https://api.aladhan.com/v1/timingsByAddress?address={city}";
+            }
+            else
+            {
+                url = $"https://api.aladhan.com/v1/timings?latitude={latitude}&longitude={longitude}&method=2";
+            }
+
+            using var client = new HttpClient();
+            var response = await client.GetStringAsync(url);
+            using var doc = JsonDocument.Parse(response);
+            var timings = doc.RootElement.GetProperty("data").GetProperty("timings");
+
+            // Get location name from API response
+            if (string.IsNullOrWhiteSpace(city))
+            {
+                var meta = doc.RootElement.GetProperty("data").GetProperty("meta");
+                City = meta.GetProperty("timezone").GetString() ?? "Your Location";
+            }
+
+            if (TimeSpan.TryParse(timings.GetProperty("Fajr").GetString(), out var fajrSpan)) FajrTime = fajrSpan;
+            if (TimeSpan.TryParse(timings.GetProperty("Dhuhr").GetString(), out var dhuhrSpan)) DhuhrTime = dhuhrSpan;
+            if (TimeSpan.TryParse(timings.GetProperty("Asr").GetString(), out var asrSpan)) AsrTime = asrSpan;
+            if (TimeSpan.TryParse(timings.GetProperty("Maghrib").GetString(), out var maghribSpan)) MaghribTime = maghribSpan;
+            if (TimeSpan.TryParse(timings.GetProperty("Isha").GetString(), out var ishaSpan)) IshaTime = ishaSpan;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error fetching prayer times: {ex.Message}");
+        }
+    }
+
+    private bool IsPrayerPassed(TimeSpan? prayerTime)
+    {
+        var now = DateTime.Now;
+        var today = now.Date + (prayerTime ?? TimeSpan.Zero);
+        return today <= now;
+    }
+
+    private Color GetTimelineItemColor(TimeSpan? prayerTime)
+    {
+        return IsPrayerPassed(prayerTime) ? _passedColor : _upcomingColor;
+    }
+
+    private string TimeUntil(TimeSpan? prayerTime)
+    {
+        if (prayerTime is null) 
+            return "--";
+        var now = DateTime.Now;
+        var today = now.Date + prayerTime.Value;
+        if (today <= now) today = today.AddDays(1);
+        var diff = today - now;
+        return $"{diff.Hours}h {diff.Minutes}m";
+    }
+
+    private class LocationResult
+    {
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
+    }
+}
