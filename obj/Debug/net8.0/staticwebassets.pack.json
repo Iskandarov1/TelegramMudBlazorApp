@@ -1,0 +1,53 @@
+{
+  "Files": [
+    {
+      "Id": "/Users/iskandarovs/TelegramMudBlazorApp/bin/Debug/net8.0/wwwroot/_framework/blazor.webassembly.js",
+      "PackagePath": "staticwebassets/_framework/blazor.webassembly.js"
+    },
+    {
+      "Id": "/Users/iskandarovs/TelegramMudBlazorApp/obj/Debug/net8.0/compressed/adjxqlgaij.gz",
+      "PackagePath": "staticwebassets/_framework/blazor.webassembly.js.gz"
+    },
+    {
+      "Id": "/Users/iskandarovs/TelegramMudBlazorApp/obj/Debug/net8.0/scopedcss/bundle/TelegramMudBlazorApp.styles.css",
+      "PackagePath": "staticwebassets/TelegramMudBlazorApp.styles.css"
+    },
+    {
+      "Id": "/Users/iskandarovs/TelegramMudBlazorApp/wwwroot/css/app.css",
+      "PackagePath": "staticwebassets/css/app.css"
+    },
+    {
+      "Id": "/Users/iskandarovs/TelegramMudBlazorApp/wwwroot/favicon.png",
+      "PackagePath": "staticwebassets/favicon.png"
+    },
+    {
+      "Id": "/Users/iskandarovs/TelegramMudBlazorApp/wwwroot/icon-192.png",
+      "PackagePath": "staticwebassets/icon-192.png"
+    },
+    {
+      "Id": "/Users/iskandarovs/TelegramMudBlazorApp/wwwroot/index.html",
+      "PackagePath": "staticwebassets/index.html"
+    },
+    {
+      "Id": "/Users/iskandarovs/TelegramMudBlazorApp/wwwroot/sample-data/weather.json",
+      "PackagePath": "staticwebassets/sample-data/weather.json"
+    },
+    {
+      "Id": "obj/Debug/net8.0/staticwebassets/msbuild.TelegramMudBlazorApp.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj/Debug/net8.0/staticwebassets/msbuild.build.TelegramMudBlazorApp.props",
+      "PackagePath": "build\\TelegramMudBlazorApp.props"
+    },
+    {
+      "Id": "obj/Debug/net8.0/staticwebassets/msbuild.buildMultiTargeting.TelegramMudBlazorApp.props",
+      "PackagePath": "buildMultiTargeting\\TelegramMudBlazorApp.props"
+    },
+    {
+      "Id": "obj/Debug/net8.0/staticwebassets/msbuild.buildTransitive.TelegramMudBlazorApp.props",
+      "PackagePath": "buildTransitive\\TelegramMudBlazorApp.props"
+    }
+  ],
+  "ElementsToRemove": []
+}
