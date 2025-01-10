@@ -20,7 +20,7 @@
                 <MudCardContent>
                     <MudText Typo="Typo.h5">Current Time: @DateTime.Now.ToString("hh:mm:ss tt")</MudText>
                  
-                    <MudText>Target: @QiblaDirection | Current: @currentDirection.ToString("F1")°</MudText>
+                    <MudText>Target: @QiblaDirection | Current: @currentDirection</MudText>
                 </MudCardContent>
             </MudCard>
         </div>
@@ -184,6 +184,7 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        if (firstRender){ 
          try 
         {
             await JSRuntime.InvokeVoidAsync("requestOrientationPermission");
@@ -194,6 +195,8 @@
         {
             Console.WriteLine($"Error initializing compass: {ex.Message}");
         }
+        }
+
     }
 
     [JSInvokable]

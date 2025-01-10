@@ -78,7 +78,7 @@
                     if (event.alpha != null) {
                         dotnetHelper.invokeMethodAsync('UpdateDirection', event.alpha);
                     }
-                });
+                },true);
             } else {
                 console.error('Device orientation not supported');
             }
