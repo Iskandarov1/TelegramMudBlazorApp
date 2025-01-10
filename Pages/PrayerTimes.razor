@@ -184,10 +184,15 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender)
+         try 
         {
+            await JSRuntime.InvokeVoidAsync("requestOrientationPermission");
             objRef = DotNetObjectReference.Create(this);
             await JSRuntime.InvokeVoidAsync("initializeCompass", objRef);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error initializing compass: {ex.Message}");
         }
     }
 
