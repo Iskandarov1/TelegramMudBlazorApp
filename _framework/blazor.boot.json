@@ -1,7 +1,7 @@
 {
   "mainAssemblyName": "TelegramMudBlazorApp",
   "resources": {
-    "hash": "sha256-aDrusvih67oX6uv8FWSX69b6b16cKKMKn99qwk/3Cuo=",
+    "hash": "sha256-PNXFyrBhGnVbGA3KqyLbyUF4S+iNw4iJCynmDOf/OmM=",
     "jsModuleNative": {
       "dotnet.native.8.0.11.n1sf6xr5tz.js": "sha256-VdKq87/z5NIxZKmuM+fv38XF+RcEb/bg3jVBwQSfwP4="
     },
@@ -52,7 +52,7 @@
       "System.Text.Encodings.Web.wasm": "sha256-Eq+TOED4xgKQTWKS82ya/h1BOhJ9CymWZesbhFf0aqc=",
       "System.Text.Json.wasm": "sha256-Ii0PHVDDJQWHXxwjSW1M0Z5m0oRSWm8n0wHZA7xe/dE=",
       "System.Text.RegularExpressions.wasm": "sha256-5muLtnf9WC6V746+XGPjrTOhvzWH9G+7xMx78ms+KFk=",
-      "TelegramMudBlazorApp.wasm": "sha256-cF8NV+njUi+hkKB8UjzptjFgkK4DTifF9fJ43eZIUoU="
+      "TelegramMudBlazorApp.wasm": "sha256-dDijgycVr8NEhhWztul0t3Wl+eutqTeVXYRJEo9Z5ZQ="
     }
   },
   "cacheBootResources": true,
