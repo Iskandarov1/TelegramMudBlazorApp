@@ -56,6 +56,34 @@
             });
         }
     </script>
+    <script>
+        // Requests orientation permission on iOS
+        window.requestOrientationPermission = async () => {
+            if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+                try {
+                    const permission = await DeviceOrientationEvent.requestPermission();
+                    return permission === 'granted';
+                } catch (error) {
+                    console.error('Error requesting orientation permission:', error);
+                    return false;
+                }
+            }
+            return true; // Non-iOS devices
+        };
+    
+        // Initializes compass event listener
+        window.initializeCompass = (dotnetHelper) => {
+            if (window.DeviceOrientationEvent) {
+                window.addEventListener('deviceorientation', (event) => {
+                    if (event.alpha != null) {
+                        dotnetHelper.invokeMethodAsync('UpdateDirection', event.alpha);
+                    }
+                });
+            } else {
+                console.error('Device orientation not supported');
+            }
+        };
+    </script>
 
 </body>
 
