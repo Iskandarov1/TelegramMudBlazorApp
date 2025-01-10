@@ -251,7 +251,7 @@
 
         try
         {
-            string url = $"http://api.aladhan.com/v1/qibla/{latitude}/{longitude}";
+            string url = $"https://api.aladhan.com/v1/qibla/{latitude}/{longitude}";
             using var client = new HttpClient();
             var response = await client.GetStringAsync(url);
             using var doc = JsonDocument.Parse(response);
