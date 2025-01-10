@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Prayer Times</title>
+    <base href="/TelegramMudBlazorApp/" />
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css?family=Material+Icons&display=block" rel="stylesheet">
+    <link href="_content/MudBlazor/MudBlazor.min.css" rel="stylesheet" />
+    <link href="css/app.css" rel="stylesheet" />
+    <link href="TelegramMudBlazorApp.styles.css" rel="stylesheet" />
+    <link rel="icon" type="image/png" href="favicon.png" />
+</head>
+
+<body>
+    <div id="app">
+        <!-- Loading indicator -->
+        <div style="height:100%;width:100%;margin:0;position:fixed;">
+            <div style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);">
+                <div class="mud-progress-circular mud-default-text mud-progress-medium mud-progress-indeterminate">
+                    <svg class="mud-progress-circular-svg" viewBox="22 22 44 44">
+                        <circle class="mud-progress-circular-circle mud-progress-indeterminate" cx="44" cy="44" r="20" fill="none" stroke-width="4"></circle>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error UI -->
+    <div id="blazor-error-ui">
+        An unhandled error has occurred.
+        <a href="" class="reload">Reload</a>
+        <a class="dismiss">🗙</a>
+    </div>
+
+    <!-- Required Scripts -->
+    <script src="_framework/blazor.webassembly.js"></script>
+    <script src="_content/MudBlazor/MudBlazor.min.js"></script>
+    
+    <!-- Geolocation Script -->
+    <script>
+        async function getLocation() {
+            return new Promise((resolve, reject) => {
+                if (!navigator.geolocation) {
+                    reject(new Error("Geolocation is not supported"));
+                }
+                navigator.geolocation.getCurrentPosition(
+                    position => resolve({
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude
+                    }),
+                    error => reject(error)
+                );
+            });
+        }
+    </script>
+
+</body>
+
+</html>
