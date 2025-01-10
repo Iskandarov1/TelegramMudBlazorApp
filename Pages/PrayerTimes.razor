@@ -19,10 +19,17 @@
             <MudCard>
                 <MudCardContent>
                     <MudText Typo="Typo.h5">Current Time: @DateTime.Now.ToString("hh:mm:ss tt")</MudText>
+                 
+                    <MudText>Target: @QiblaDirection | Current: @currentDirection.ToString("F1")°</MudText>
                 </MudCardContent>
             </MudCard>
         </div>
         
+
+                @* <MudText Typo="Typo.h5">Qibla Direction: @QiblaDirection</MudText> *@
+
+        
+
         <!-- Prayer Times Timeline -->
         <MudTimeline>
             <!-- EARLY MORNING (FAJR) -->
@@ -111,7 +118,26 @@
                 </ItemContent>
             </MudTimelineItem>
         </MudTimeline>
+
+        
     }
+</MudContainer>
+<MudContainer>
+
+         
+        
+
+        @* <MudSlider 
+                    Size="Size.Large" 
+                    Value="@currentDirection"
+                    Vertical="true"
+                    Variant="Variant.Filled"
+                    ValueLabel="true"
+                    Disabled="true"
+                    Min="0"
+                    Max="@qiblaTarget"
+                    Color="@GetQiblaAlignmentColor()"
+                /> *@
 </MudContainer>
 
 @code {
@@ -119,6 +145,8 @@
     private double? latitude;
     private double? longitude;
     private string City { get; set; } = "DefaultCity";
+    private string QiblaDirection = "Loading...";
+
     private TimeSpan? FajrTime    { get; set; }
     private TimeSpan? DhuhrTime   { get; set; }
     private TimeSpan? AsrTime     { get; set; }
@@ -128,6 +156,10 @@
     private readonly Color _passedColor = Color.Dark;
     private readonly Color _upcomingColor = Color.Info;
 
+    private double currentDirection = 0;
+    private double qiblaTarget = 0;
+    private DotNetObjectReference<PrayerTimes>? objRef;
+
     protected override async Task OnInitializedAsync()
     {
         try
@@ -136,9 +168,11 @@
             latitude = location.Latitude;
             longitude = location.Longitude;
             await FetchPrayerTimes();
+            await FetchQiblaDirection();
         }
         catch (Exception ex)
         {
+             Console.WriteLine($"Error fetching location: {ex.Message}");
             // Fallback to default city if location access fails
             await FetchPrayerTimes("DefaultCity");
         }
@@ -148,7 +182,23 @@
         }
     }
 
-    private async Task FetchPrayerTimes(string city = null)
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            objRef = DotNetObjectReference.Create(this);
+            await JSRuntime.InvokeVoidAsync("initializeCompass", objRef);
+        }
+    }
+
+    [JSInvokable]
+    public void UpdateDirection(double direction)
+    {
+        currentDirection = direction;
+        StateHasChanged();
+    }
+
+    private async Task FetchPrayerTimes(string? city = null)
     {
         if (string.IsNullOrWhiteSpace(city) && (!latitude.HasValue || !longitude.HasValue))
             return;
@@ -189,6 +239,28 @@
         }
     }
 
+    private async Task FetchQiblaDirection()
+    {
+        if (!latitude.HasValue || !longitude.HasValue)
+            return;
+
+        try
+        {
+            string url = $"http://api.aladhan.com/v1/qibla/{latitude}/{longitude}";
+            using var client = new HttpClient();
+            var response = await client.GetStringAsync(url);
+            using var doc = JsonDocument.Parse(response);
+            var data = doc.RootElement.GetProperty("data");
+            qiblaTarget = data.GetProperty("direction").GetDouble();
+            QiblaDirection = $"{qiblaTarget:F2}°";
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error fetching Qibla direction: {ex.Message}");
+            QiblaDirection = "Error fetching Qibla direction";
+        }
+    }
+
     private bool IsPrayerPassed(TimeSpan? prayerTime)
     {
         var now = DateTime.Now;
@@ -210,6 +282,14 @@
         if (today <= now) today = today.AddDays(1);
         var diff = today - now;
         return $"{diff.Hours}h {diff.Minutes}m";
+    }
+
+    private Color GetQiblaAlignmentColor()
+    {
+        var diff = Math.Abs(currentDirection - qiblaTarget);
+        if (diff <= 2) return Color.Success;
+        if (diff <= 15) return Color.Warning;
+        return Color.Error;
     }
 
     private class LocationResult
