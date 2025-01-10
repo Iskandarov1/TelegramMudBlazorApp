@@ -14,4 +14,5 @@ builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.
 // Remove this line as IJSRuntime is already registered by default in Blazor WebAssembly
 // builder.Services.AddScoped<IJSRuntime>();
 
-await builder.Build().RunAsync();
+var app = builder.Build();
+await app.RunAsync();
