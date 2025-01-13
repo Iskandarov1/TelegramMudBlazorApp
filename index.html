@@ -84,6 +84,89 @@
             }
         };
     </script>
+    
+
+    <script>
+        // Accelerometer initialization and permission handling
+        window.initializeAccelerometer = async (dotnetHelper) => {
+            try {
+                // First try DeviceOrientation API as it's more widely supported
+                if ('DeviceOrientationEvent' in window) {
+                    if (DeviceOrientationEvent.requestPermission) {
+                        const permission = await DeviceOrientationEvent.requestPermission();
+                        if (permission !== 'granted') {
+                            console.error('DeviceOrientation permission not granted');
+                            return false;
+                        }
+                    }
+
+                    window.addEventListener('deviceorientation', (event) => {
+                        if (event.alpha != null) {
+                            dotnetHelper.invokeMethodAsync('UpdateDirection', event.alpha);
+                        }
+                    }, true);
+                    
+                    return true;
+                }
+                
+                // Fallback to Accelerometer API
+                if ('Accelerometer' in window) {
+                    try {
+                        const accelerometer = new Accelerometer({ 
+                            frequency: 60,
+                            referenceFrame: 'screen'
+                        });
+                        
+                        const readingHandler = () => {
+                            try {
+                                const x = accelerometer.x;
+                                const y = accelerometer.y;
+                                
+                                if (x != null && y != null) {
+                                    const angle = Math.atan2(y, x) * (180 / Math.PI);
+                                    const normalizedAngle = (angle + 360) % 360;
+                                    dotnetHelper.invokeMethodAsync('UpdateDirection', normalizedAngle);
+                                }
+                            } catch (e) {
+                                console.error('Error reading accelerometer:', e);
+                            }
+                        };
+
+                        accelerometer.addEventListener('reading', readingHandler);
+                        
+                        accelerometer.addEventListener('error', (error) => {
+                            console.error('Accelerometer error:', error);
+                            // Don't try to restart on NotReadableError
+                            if (error.error.name !== 'NotReadableError' && accelerometer.activated) {
+                                accelerometer.stop();
+                                setTimeout(() => accelerometer.start(), 1000);
+                            }
+                        });
+
+                        accelerometer.start();
+                        return true;
+
+                    } catch (err) {
+                        if (err.name === 'SecurityError') {
+                            console.error('Accelerometer permission denied');
+                        } else if (err.name === 'NotReadableError') {
+                            console.error('Accelerometer sensor not available');
+                        } else {
+                            console.error('Accelerometer error:', err);
+                        }
+                        return false;
+                    }
+                }
+
+                console.error('Neither DeviceOrientation nor Accelerometer is supported');
+                return false;
+
+            } catch (error) {
+                console.error('Error initializing sensors:', error);
+                return false;
+            }
+        };
+    </script>
 
 </body>
 
