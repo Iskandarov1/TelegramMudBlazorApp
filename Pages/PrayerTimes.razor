@@ -13,14 +13,14 @@
     }
     else
     {
-        <MudText Typo="Typo.h4">Prayer Times for @City</MudText>
+        
 
         <div class="ma-4">
-            <MudCard>
+            <MudCard Outlined="true" Elevation="25">
                 <MudCardContent>
-                    <MudText Typo="Typo.h5">Current Time: @DateTime.Now.ToString("hh:mm:ss tt")</MudText>
-                 
-                    <MudText>Target: @QiblaDirection | Current: @currentDirection</MudText>
+                    <MudText Typo="Typo.h6" Align="Align.Center">Current Time: @DateTime.Now.ToString("hh:mm:ss tt")</MudText>
+                    <MudText Align="Align.Center" Typo="Typo.subtitle1">Target: @QiblaDirection | Current: @currentDirection.ToString("F1")°</MudText>
+                    <MudText Typo="Typo.subtitle1" Align="Align.Center">@City</MudText>
                 </MudCardContent>
             </MudCard>
         </div>
@@ -33,7 +33,15 @@
         <!-- Prayer Times Timeline -->
         <MudTimeline>
             <!-- EARLY MORNING (FAJR) -->
-            <MudTimelineItem Color="@GetTimelineItemColor(FajrTime)" Elevation="25">
+            <MudTimelineItem 
+            Color="@GetTimelineItemColor(FajrTime)" 
+            Elevation="25"
+            Icon="Icons.Material.Filled.Brightness2" 
+             >
+                @* <ItemDot>
+                     <MudIcon Icon="@Icons.Material.Filled.Brightness2"/>
+                </ItemDot> *@
+
                 <ItemOpposite>
                 <MudText Typo="Typo.h5">Fajr</MudText>
                 </ItemOpposite>
@@ -52,6 +60,9 @@
 
             <!-- MIDDAY (DHUHR) -->
             <MudTimelineItem Color="@GetTimelineItemColor(DhuhrTime)" Elevation="25" TimelineAlign="TimelineAlign.End">
+               @* <ItemDot>
+                     <MudIcon Icon="@Icons.Material.Filled.BrightnessHigh"/>
+                </ItemDot> *@
                <ItemOpposite>
                 <MudText Typo="Typo.h5">Dhuhr</MudText>
                 </ItemOpposite>
@@ -69,6 +80,9 @@
 
             <!-- AFTERNOON (ASR) -->
             <MudTimelineItem Color="@GetTimelineItemColor(AsrTime)" Elevation="25">
+                @* <ItemDot>
+                     <MudIcon Icon="@Icons.Material.Filled.Brightness6"/>
+                </ItemDot> *@
                 <ItemOpposite>
                 <MudText Typo="Typo.h5">Asr</MudText>
                 </ItemOpposite>
@@ -86,6 +100,9 @@
 
             <!-- SUNSET (MAGHRIB) -->
             <MudTimelineItem Color="@GetTimelineItemColor(MaghribTime)" Elevation="25" TimelineAlign="TimelineAlign.End">
+                @* <ItemDot>
+                     <MudIcon Icon="@Icons.Material.Filled.Brightness4"/>
+                </ItemDot> *@
                 <ItemOpposite>
                 <MudText Typo="Typo.h5">Maghrib</MudText>
                 </ItemOpposite>
@@ -103,6 +120,9 @@
 
             <!-- NIGHT (ISHA) -->
             <MudTimelineItem Color="@GetTimelineItemColor(IshaTime)" Elevation="25">
+                @* <ItemDot>
+                     <MudIcon Icon="@Icons.Material.Filled.Bedtime"/>
+                </ItemDot> *@
                 <ItemOpposite>
                 <MudText Typo="Typo.h5">Isha</MudText>
                 </ItemOpposite>
@@ -190,6 +210,8 @@
             await JSRuntime.InvokeVoidAsync("requestOrientationPermission");
             objRef = DotNetObjectReference.Create(this);
             await JSRuntime.InvokeVoidAsync("initializeCompass", objRef);
+            await JSRuntime.InvokeVoidAsync("initializeAccelerometer", objRef);
+
         }
         catch (Exception ex)
         {
@@ -203,6 +225,17 @@
     public void UpdateDirection(double direction)
     {
         currentDirection = direction;
+        StateHasChanged();
+    }
+    [JSInvokable]
+    public void UpdateAccelerometerData(double x, double y, double z)
+    {
+        Console.WriteLine($"Accel => X: {x}, Y: {y}, Z: {z}");
+
+        // If you just want to track angle:
+        var angle = Math.Atan2(y, x) * (180 / Math.PI);
+        currentDirection = (angle + 360) % 360;
+
         StateHasChanged();
     }
 
